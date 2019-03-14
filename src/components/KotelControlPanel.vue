@@ -1,20 +1,25 @@
 <template>
 
-    <div id="cpBase"> 
+    <div id="cpBase"
+      
+    > 
       <div class="led" id="led1" on="on"></div>
       <div class="led" id="led2"></div>
       <div id="ddt"> .8.</div>
       <!--div id="dig1"></div><div id="dig2"></div><div-- id="dot"></div-->
       <div id="leftButt" @click="leftButt"></div>
       <div id="rightButt" @click="rightButt"></div>
-      <div id="mokButt" @click="modeButt"></div>
-      <div id="cpBaseShadow"></div>
+      <div id="mokButt" @click="setDisabled"></div>
+      <div id="cpBaseShadow">
+        <div class="el-loading-spinner"><i class="el-icon-loading"></i><p class="el-loading-text">Обаждите...</p></div>
+      </div>
     </div>
 
 </template>
 <script>
 import axios from 'axios';
 import comm from '@/common.js';
+import { bus } from '@/bus.js';
 
 //var md5 = require('md5');
 
@@ -29,11 +34,15 @@ import comm from '@/common.js';
       curSatgeInx: 0,
       curVaInx: 0,
       led1: document.getElementById("led1"),
-      task: null
+      task: null,
+      isDisable: false
     }),
     created: function() {
       this.led1 = document.getElementById("led1");
       this.getValues();
+    },
+    mounted: function() {
+      bus.$on('tryCloseMapDialog', this.dialogCloseHandler);
     },
     updated: function() {
       console.log('#####: Updated');
@@ -44,6 +53,11 @@ import comm from '@/common.js';
       this.dispCurrentView();
     },
     methods: {
+      dialogCloseHandler: function() {
+        this.setDisabled(false);
+        this.stopBlink();
+        bus.$emit('closeMapDialog');
+      },
       buttClick: function(ev) {
         var id = ev.target.id;
         var butt = id.substring(0,1).toUpperCase();
@@ -276,7 +290,8 @@ import comm from '@/common.js';
         }
         return mm+'_'+st;
       },
-      setDisabled: isBlock => {
+      setDisabled: function(isBlock) {
+        this.isDisable = true;
         var shadow = document.getElementById("cpBaseShadow");
         shadow.style.display = isBlock ? 'block' : 'none';
       }

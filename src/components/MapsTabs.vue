@@ -19,10 +19,10 @@
         :close-on-click-modal = "false"
       >
         
-        <KotelControlPanel v-if="deviceType=='kotelIcon'"/>
+        <KotelControlPanel :closeComm="closeComm" v-if="deviceType=='kotelIcon'"/>
 
         <span slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="dialogClose">Закрыть</el-button>
+          <el-button type="primary" @click="tryClose">Закрыть</el-button>
         </span>
       </el-dialog>
 
@@ -33,6 +33,7 @@ import axios from 'axios'
 import MapSensors from '@/components/MapSensors.vue';
 import KotelControlPanel from '@/components/KotelControlPanel.vue';
 import comm from '@/common.js'
+import { bus } from '@/bus.js'
 
   export default {
     data: () => ({
@@ -44,7 +45,8 @@ import comm from '@/common.js'
         {id:1,title:"Первый Этаж",pict:"dacha.png",w:3000,h:1454,description:"План первого этажа"},
         {id:2,title:"Второй этаж",pict:"dacha2.png",w:2000,h:1432,description:"План второго этажа"}
       ],
-      sensorData: []
+      sensorData: [],
+      closeComm: false
     }),
     components: { MapSensors, KotelControlPanel },
     created: function() {
@@ -72,7 +74,13 @@ import comm from '@/common.js'
         this.resizeImage();
         //this.getMapSensors();
     },
+    mounted: function() {
+      bus.$on('closeMapDialog', this.dialogClose);
+    },
     methods: {
+      tryClose: function() {
+        bus.$emit('tryCloseMapDialog');
+      },
       dialogClose: function() {
         this.dialogVisible = false;
       },
